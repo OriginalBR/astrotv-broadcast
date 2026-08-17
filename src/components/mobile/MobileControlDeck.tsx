@@ -135,8 +135,8 @@ export const MobileControlDeck: React.FC<MobileControlDeckProps> = ({ onSwitchTo
       {/* 1. Header Bar (Status & Emergency Blackout) */}
       <header className="h-11 bg-[#0c101a] border-b border-white/10 px-3 flex items-center justify-between flex-shrink-0 z-20">
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 bg-red-600 px-2 py-0.5 rounded shadow text-xs font-black font-condensed tracking-wider uppercase">
-            <Tv className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-1.5 bg-gradient-to-r from-red-600 to-slate-900 px-2 py-0.5 rounded-lg shadow text-xs font-black font-condensed tracking-wider uppercase border border-red-500/40">
+            <img src="/logo.png" alt="Logo" className="w-4 h-4 rounded object-contain ring-1 ring-yellow-400/50" />
             <span>{stationName}</span>
           </div>
 

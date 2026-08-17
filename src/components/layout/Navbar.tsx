@@ -110,8 +110,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     <header className="h-16 bg-[#0c101a] border-b border-white/10 px-6 flex items-center justify-between z-30 select-none">
       {/* Brand Section */}
       <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2.5 bg-gradient-to-r from-red-600 to-red-800 px-3 py-1.5 rounded-lg shadow-lg border border-red-500/30">
-          <Tv className="w-5 h-5 text-white" />
+        <div className="flex items-center gap-2.5 bg-gradient-to-r from-red-600 via-red-700 to-slate-900 px-3 py-1.5 rounded-xl shadow-lg border border-red-500/40">
+          <img src="/logo.png" alt="AstroTv Logo" className="w-7 h-7 rounded-lg object-contain ring-1 ring-yellow-400/60 shadow" />
           <span className="font-black text-xl tracking-wider text-white font-condensed uppercase">
             {stationName}
           </span>

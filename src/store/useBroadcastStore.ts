@@ -223,7 +223,7 @@ export const initialBugs: BugData[] = [
   {
     id: 'bg-1',
     name: 'Logo AstroTv + Ao Vivo (Canto Superior Direito)',
-    logoUrl: '',
+    logoUrl: '/logo.png',
     position: 'top-right',
     scale: 1.0,
     opacity: 0.95,
@@ -237,7 +237,7 @@ export const initialBugs: BugData[] = [
   {
     id: 'bg-2',
     name: 'Marca d\'Água Transmissão Especial',
-    logoUrl: '',
+    logoUrl: '/logo.png',
     position: 'top-left',
     scale: 0.9,
     opacity: 0.85,
@@ -435,7 +435,7 @@ export const useBroadcastStore = create<BroadcastStore>()(
 
       brandTheme: defaultBrandTheme,
       stationName: 'ASTRO TV',
-      stationLogoUrl: '',
+      stationLogoUrl: '/logo.png',
 
       lowerThirds: initialLowerThirds,
       scoreboards: initialScoreboards,
