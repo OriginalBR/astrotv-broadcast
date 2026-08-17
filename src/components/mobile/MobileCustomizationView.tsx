@@ -58,6 +58,12 @@ export const MobileCustomizationView: React.FC = () => {
   // Broadcast Palettes
   const presetPalettes = [
     { name: 'AstroTV News (Padrão)', primary: '#e63946', secondary: '#073b4c', accent: '#ffd166' },
+    { name: 'Furacão Roxo (E-Sports)', primary: '#7C3AED', secondary: '#100B1E', accent: '#39FF88' },
+    { name: 'Pôr do Sol Retrô (Vintage)', primary: '#FF6B35', secondary: '#2E1760', accent: '#FFD23F' },
+    { name: 'Gelo Ártico (Elegante/Frio)', primary: '#2196F3', secondary: '#0A1929', accent: '#64FFDA' },
+    { name: 'Ouro Olímpico (Premiação)', primary: '#D4AF37', secondary: '#0D1B2A', accent: '#C41E3A' },
+    { name: 'Interclasse Rubro-Negro (Rivalidade)', primary: '#C1121F', secondary: '#101010', accent: '#E0E1DD' },
+    { name: 'Futsal Noturno (Jogo à Noite)', primary: '#FF8500', secondary: '#1B1035', accent: '#00F5FF' },
     { name: 'Astro Sports (Ao Vivo)', primary: '#ff0033', secondary: '#0f172a', accent: '#00f0ff' },
     { name: 'Cyber Neon Tech', primary: '#f72585', secondary: '#3a0ca3', accent: '#4cc9f0' },
     { name: 'Brasil Esporte (Verde/Amarelo)', primary: '#009c3b', secondary: '#002776', accent: '#ffdf00' },
