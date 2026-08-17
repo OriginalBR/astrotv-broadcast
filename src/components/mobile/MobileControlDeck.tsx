@@ -19,11 +19,13 @@ import {
   Minus,
   Maximize2,
   Eye,
-  Monitor
+  Monitor,
+  Download
 } from 'lucide-react';
 import { useBroadcastStore } from '../../store/useBroadcastStore';
 import { RenderOverlay } from '../canvas/RenderOverlay';
 import { broadcastBus, ConnectionStatus } from '../../utils/broadcastSync';
+import { ExportModal } from '../modals/ExportModal';
 
 interface MobileControlDeckProps {
   onSwitchToDesktop?: () => void;
@@ -64,6 +66,11 @@ export const MobileControlDeck: React.FC<MobileControlDeckProps> = ({ onSwitchTo
   const [wsStatus, setWsStatus] = useState<ConnectionStatus>('connecting');
   const [clientCount, setClientCount] = useState<number>(1);
   const [isLandscape, setIsLandscape] = useState(false);
+
+  // Export Modal state
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [exportCategory, setExportCategory] = useState<'lowerThird' | 'scoreboard' | 'ticker' | 'bug' | 'countdown' | 'fullscreen'>('lowerThird');
+  const [exportTargetItem, setExportTargetItem] = useState<any>(null);
 
   // References and dynamic scale calculation for pixel-perfect preview
   const previewBoxRef = useRef<HTMLDivElement>(null);
@@ -130,11 +137,29 @@ export const MobileControlDeck: React.FC<MobileControlDeckProps> = ({ onSwitchTo
     }
   };
 
+  const handleOpenExport = (category: 'lowerThird' | 'scoreboard' | 'ticker' | 'bug' | 'countdown' | 'fullscreen', item: any) => {
+    setExportCategory(category);
+    setExportTargetItem(item);
+    setIsExportModalOpen(true);
+  };
+
+  const handleQuickExportCurrent = () => {
+    if (activeLowerThird) {
+      handleOpenExport('lowerThird', activeLowerThird);
+    } else if (activeScoreboard) {
+      handleOpenExport('scoreboard', activeScoreboard);
+    } else if (activeTicker) {
+      handleOpenExport('ticker', activeTicker);
+    } else {
+      handleOpenExport('lowerThird', lowerThirds[0]);
+    }
+  };
+
   return (
     <div className="h-[100dvh] w-screen bg-[#070a12] text-white flex flex-col overflow-hidden select-none touch-manipulation font-sans">
-      {/* 1. Header Bar (Status & Emergency Blackout) */}
-      <header className="h-11 bg-[#0c101a] border-b border-white/10 px-3 flex items-center justify-between flex-shrink-0 z-20">
-        <div className="flex items-center gap-2">
+      {/* 1. Header Bar (Status & Download & Emergency Blackout) */}
+      <header className="h-11 bg-[#0c101a] border-b border-white/10 px-2.5 flex items-center justify-between flex-shrink-0 z-20">
+        <div className="flex items-center gap-1.5">
           <div className="flex items-center gap-1.5 bg-gradient-to-r from-red-600 to-slate-900 px-2 py-0.5 rounded-lg shadow text-xs font-black font-condensed tracking-wider uppercase border border-red-500/40">
             <img src="/logo.png" alt="Logo" className="w-4 h-4 rounded object-contain ring-1 ring-yellow-400/50" />
             <span>{stationName}</span>
@@ -150,19 +175,31 @@ export const MobileControlDeck: React.FC<MobileControlDeckProps> = ({ onSwitchTo
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          {/* Quick Download Button on Mobile */}
+          <button
+            onClick={handleQuickExportCurrent}
+            className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-blue-600 to-cyan-600 active:from-blue-700 active:to-cyan-700 text-white rounded-md text-[11px] font-bold shadow"
+            title="Baixar Overlay (PNG / Vídeo / HTML)"
+          >
+            <Download className="w-3 h-3" />
+            <span>BAIXAR</span>
+          </button>
+
+          {/* Sound Mute Toggle */}
           <button
             onClick={toggleAudioMute}
             className={`p-1.5 rounded-md border text-xs ${
               audioMuted ? 'bg-red-500/20 text-red-400 border-red-500/30' : 'bg-[#161d2d] text-slate-300 border-white/10'
             }`}
           >
-            {audioMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+            {audioMuted ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
           </button>
 
+          {/* Clear All Button */}
           <button
             onClick={clearAllOverlays}
-            className="flex items-center gap-1 px-2.5 py-1 bg-red-900/90 active:bg-red-800 text-red-100 rounded-md text-[11px] font-black uppercase border border-red-600/50 shadow"
+            className="flex items-center gap-1 px-2 py-1 bg-red-900/90 active:bg-red-800 text-red-100 rounded-md text-[11px] font-black uppercase border border-red-600/50 shadow"
           >
             <AlertOctagon className="w-3 h-3 text-red-400" />
             <span>LIMPAR</span>
@@ -332,7 +369,7 @@ export const MobileControlDeck: React.FC<MobileControlDeckProps> = ({ onSwitchTo
                   </div>
                 </div>
 
-                {/* Match Clock & On-Air Action Row */}
+                {/* Match Clock & Action Row */}
                 <div className="flex items-center gap-2 h-13 flex-shrink-0">
                   <button
                     onClick={toggleScoreboardTimer}
@@ -350,21 +387,30 @@ export const MobileControlDeck: React.FC<MobileControlDeckProps> = ({ onSwitchTo
                   <button
                     onClick={handleResetTimer}
                     title="Zerar Cronômetro"
-                    className="w-11 h-full bg-[#111726] active:bg-slate-700 rounded-xl border border-white/10 flex items-center justify-center text-slate-300"
+                    className="w-10 h-full bg-[#111726] active:bg-slate-700 rounded-xl border border-white/10 flex items-center justify-center text-slate-300"
                   >
-                    <RotateCcw className="w-4 h-4" />
+                    <RotateCcw className="w-3.5 h-3.5" />
+                  </button>
+
+                  {/* Download Placar PNG/Video */}
+                  <button
+                    onClick={() => handleOpenExport('scoreboard', currentSb)}
+                    title="Baixar Placar"
+                    className="w-10 h-full bg-[#141d2f] active:bg-blue-600 rounded-xl border border-white/10 flex items-center justify-center text-blue-400"
+                  >
+                    <Download className="w-3.5 h-3.5" />
                   </button>
 
                   <button
                     onClick={() => setScoreboardOnAir(isSbOnAir ? null : currentSb.id)}
-                    className={`px-3.5 h-full rounded-xl flex items-center justify-center gap-1 font-black text-xs uppercase font-condensed shadow-lg transition-all ${
+                    className={`px-3 h-full rounded-xl flex items-center justify-center gap-1 font-black text-xs uppercase font-condensed shadow-lg transition-all ${
                       isSbOnAir
                         ? 'bg-amber-500 active:bg-amber-600 text-black border-2 border-amber-300'
                         : 'bg-emerald-600 active:bg-emerald-700 text-white border-2 border-emerald-400'
                     }`}
                   >
-                    {isSbOnAir ? <Square className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-                    <span>{isSbOnAir ? 'NO AR' : 'COLOCAR AR'}</span>
+                    {isSbOnAir ? <Square className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+                    <span>{isSbOnAir ? 'NO AR' : 'AR'}</span>
                   </button>
                 </div>
               </div>
@@ -376,28 +422,45 @@ export const MobileControlDeck: React.FC<MobileControlDeckProps> = ({ onSwitchTo
                 {lowerThirds.map((lt) => {
                   const isOnAir = activeLowerThird?.id === lt.id;
                   return (
-                    <button
+                    <div
                       key={lt.id}
-                      onClick={() => setLowerThirdOnAir(isOnAir ? null : lt.id)}
-                      className={`p-2.5 rounded-xl border text-left flex flex-col justify-between transition-all shadow ${
+                      className={`p-2.5 rounded-xl border flex flex-col justify-between transition-all shadow ${
                         isOnAir
                           ? 'bg-red-950/90 border-red-500 text-white ring-2 ring-red-500/50'
-                          : 'bg-[#0f1524] border-white/10 text-slate-200 active:bg-slate-800'
+                          : 'bg-[#0f1524] border-white/10 text-slate-200'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1">
                         <span className="px-2 py-0.5 text-[9px] font-black uppercase rounded bg-black/60 text-yellow-400 font-condensed">
                           {lt.tag || 'GC'}
                         </span>
-                        <span className={`w-2 h-2 rounded-full ${isOnAir ? 'bg-red-500 animate-ping' : 'bg-slate-600'}`} />
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenExport('lowerThird', lt);
+                            }}
+                            className="p-1 text-slate-400 hover:text-cyan-400"
+                            title="Baixar Tarja"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                          </button>
+                          <span className={`w-2 h-2 rounded-full ${isOnAir ? 'bg-red-500 animate-ping' : 'bg-slate-600'}`} />
+                        </div>
                       </div>
-                      <span className="font-bold text-xs uppercase font-condensed leading-snug line-clamp-2">
-                        {lt.title}
-                      </span>
-                      <span className="text-[10px] text-slate-400 truncate mt-1">
-                        {lt.subtitle}
-                      </span>
-                    </button>
+
+                      <button
+                        onClick={() => setLowerThirdOnAir(isOnAir ? null : lt.id)}
+                        className="text-left w-full"
+                      >
+                        <span className="font-bold text-xs uppercase font-condensed leading-snug line-clamp-2 block">
+                          {lt.title}
+                        </span>
+                        <span className="text-[10px] text-slate-400 truncate mt-0.5 block">
+                          {lt.subtitle}
+                        </span>
+                      </button>
+                    </div>
                   );
                 })}
               </div>
@@ -456,14 +519,23 @@ export const MobileControlDeck: React.FC<MobileControlDeckProps> = ({ onSwitchTo
                       {activeTicker ? 'Ativo na base da transmissão' : 'Fora do ar'}
                     </span>
                   </div>
-                  <button
-                    onClick={() => setTickerOnAir(activeTicker ? null : tickers[0]?.id)}
-                    className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider font-condensed shadow ${
-                      activeTicker ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300'
-                    }`}
-                  >
-                    {activeTicker ? 'NO AR' : 'LIGAR TICKER'}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleOpenExport('ticker', tickers[0])}
+                      className="p-2 bg-[#162035] rounded-lg text-blue-400"
+                      title="Baixar Ticker"
+                    >
+                      <Download className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setTickerOnAir(activeTicker ? null : tickers[0]?.id)}
+                      className={`px-3 py-2 rounded-lg text-xs font-black uppercase tracking-wider font-condensed shadow ${
+                        activeTicker ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300'
+                      }`}
+                    >
+                      {activeTicker ? 'NO AR' : 'LIGAR'}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="bg-[#0e1422] border border-white/10 rounded-xl p-3 flex items-center justify-between shadow">
@@ -477,11 +549,11 @@ export const MobileControlDeck: React.FC<MobileControlDeckProps> = ({ onSwitchTo
                   </div>
                   <button
                     onClick={() => setBugOnAir(activeBug ? null : bugs[0]?.id)}
-                    className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider font-condensed shadow ${
+                    className={`px-3 py-2 rounded-lg text-xs font-black uppercase tracking-wider font-condensed shadow ${
                       activeBug ? 'bg-red-600 text-white' : 'bg-slate-800 text-slate-300'
                     }`}
                   >
-                    {activeBug ? 'NO AR' : 'LIGAR LOGO'}
+                    {activeBug ? 'NO AR' : 'LIGAR'}
                   </button>
                 </div>
 
@@ -500,7 +572,7 @@ export const MobileControlDeck: React.FC<MobileControlDeckProps> = ({ onSwitchTo
         </div>
       )}
 
-      {/* 3. Fixed Native Bottom Navigation Bar (Including PREVIEW Tab) */}
+      {/* 3. Fixed Native Bottom Navigation Bar */}
       <nav className="h-16 bg-[#090d16] border-t border-white/10 grid grid-cols-5 px-1 z-30 flex-shrink-0">
         {/* Tab: Preview Monitor */}
         <button
@@ -557,6 +629,14 @@ export const MobileControlDeck: React.FC<MobileControlDeckProps> = ({ onSwitchTo
           <span className="text-[9px] font-black uppercase tracking-wider font-condensed">TICKER</span>
         </button>
       </nav>
+
+      {/* Mobile Export Modal */}
+      <ExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        category={exportCategory}
+        selectedItem={exportTargetItem}
+      />
     </div>
   );
 };
