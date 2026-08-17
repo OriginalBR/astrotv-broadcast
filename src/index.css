@@ -1,0 +1,132 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: #e63946;
+    --color-secondary: #073b4c;
+    --color-accent: #ffd166;
+    --color-surface: #111622;
+    --color-card: #161d2d;
+    --color-border: #1f293d;
+  }
+
+  body {
+    @apply bg-[#0a0d14] text-slate-100 font-sans;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Custom Broadcast Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0d111a;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #25334d;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3b82f6;
+  }
+}
+
+/* TV Broadcast UI Glassmorphism & Visual Tokens */
+.broadcast-glass {
+  background: rgba(17, 22, 34, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.broadcast-glass-dark {
+  background: rgba(10, 13, 20, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.broadcast-glow-red {
+  box-shadow: 0 0 25px -2px rgba(230, 57, 70, 0.5), 0 0 10px 0 rgba(230, 57, 70, 0.3);
+}
+
+.broadcast-glow-green {
+  box-shadow: 0 0 25px -2px rgba(6, 214, 160, 0.5), 0 0 10px 0 rgba(6, 214, 160, 0.3);
+}
+
+.broadcast-glow-blue {
+  box-shadow: 0 0 25px -2px rgba(59, 130, 246, 0.5), 0 0 10px 0 rgba(59, 130, 246, 0.3);
+}
+
+.broadcast-glow-yellow {
+  box-shadow: 0 0 25px -2px rgba(255, 209, 102, 0.5), 0 0 10px 0 rgba(255, 209, 102, 0.3);
+}
+
+/* Broadcast Motion Design Specular Light Shimmer */
+.broadcast-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.broadcast-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.25),
+    transparent
+  );
+  transform: skewX(-25deg);
+  animation: shimmerSweep 3.5s infinite;
+  pointer-events: none;
+}
+
+@keyframes shimmerSweep {
+  0% { left: -150%; }
+  35% { left: 200%; }
+  100% { left: 200%; }
+}
+
+/* Staggered Motion Delays */
+.stagger-1 { animation-delay: 50ms; }
+.stagger-2 { animation-delay: 100ms; }
+.stagger-3 { animation-delay: 180ms; }
+.stagger-4 { animation-delay: 240ms; }
+
+/* Studio Grid Pattern */
+.bg-studio-grid {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+}
+
+.scanline-overlay {
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  background-size: 100% 3px, 6px 100%;
+  pointer-events: none;
+}
+
+/* Score Pulse */
+@keyframes scorePulse {
+  0% { transform: scale(1); filter: brightness(1); }
+  40% { transform: scale(1.2) translateY(-2px); filter: brightness(1.7); color: #ffd166; }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+.animate-score-pulse {
+  animation: scorePulse 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Aspect Ratio */
+.aspect-16-9 {
+  aspect-ratio: 16 / 9;
+}
