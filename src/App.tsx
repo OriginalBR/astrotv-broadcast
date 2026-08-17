@@ -3,6 +3,7 @@ import { useBroadcastStore } from './store/useBroadcastStore';
 import { Navbar } from './components/layout/Navbar';
 import { LivePreviewBar } from './components/layout/LivePreviewBar';
 import { OutputCanvas } from './components/canvas/OutputCanvas';
+import { MobileControlDeck } from './components/mobile/MobileControlDeck';
 import { LowerThirdsManager } from './components/modules/LowerThirdsManager';
 import { ScoreboardManager } from './components/modules/ScoreboardManager';
 import { TickerManager } from './components/modules/TickerManager';
@@ -21,7 +22,7 @@ import {
   Sparkles, 
   LayoutTemplate, 
   Palette,
-  AlertTriangle
+  Smartphone
 } from 'lucide-react';
 
 type TabType = 
@@ -35,7 +36,7 @@ type TabType =
   | 'theme';
 
 export function App() {
-  // Check if current route is standalone output for OBS
+  // Check if current route is standalone output for OBS Studio
   const isOutputRoute = window.location.pathname === '/output' || window.location.hash === '#/output';
 
   const {
@@ -65,11 +66,28 @@ export function App() {
 
   const [activeTab, setActiveTab] = useState<TabType>('lowerThirds');
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+  
+  // Mobile detection & manual toggle
+  const [isMobileMode, setIsMobileMode] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth <= 850 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }
+    return false;
+  });
 
-  // Global Keyboard Shortcuts Listener
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 850) {
+        setIsMobileMode(true);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Global Keyboard Shortcuts Listener (Desktop)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if typing in an input or textarea
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement).tagName)) {
         return;
       }
@@ -133,9 +151,18 @@ export function App() {
     incrementScore,
   ]);
 
-  // If in Standalone Output Route (for OBS Studio)
+  // If in Standalone Output Route (for OBS Studio Browser Source)
   if (isOutputRoute) {
     return <OutputCanvas isStandaloneWindow={true} />;
+  }
+
+  // If on Mobile or Mobile Controller Mode
+  if (isMobileMode) {
+    return (
+      <MobileControlDeck 
+        onSwitchToDesktop={() => setIsMobileMode(false)} 
+      />
+    );
   }
 
   const tabs: { id: TabType; label: string; icon: React.ReactNode; badge?: number; isOnAir?: boolean }[] = [
@@ -195,7 +222,7 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-[#0a0d14] text-slate-100 flex flex-col font-sans">
-      {/* Master Navbar */}
+      {/* Master Navbar with Mobile Mode Switch */}
       <Navbar
         onOpenShortcuts={() => setIsShortcutsOpen(true)}
         onOpenTheme={() => setActiveTab('theme')}
@@ -205,33 +232,45 @@ export function App() {
       <LivePreviewBar />
 
       {/* Module Navigation Tabs */}
-      <nav className="bg-[#0e1320] border-b border-white/10 px-6 overflow-x-auto flex items-center gap-1 select-none">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-3.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all whitespace-nowrap ${
-              activeTab === tab.id
-                ? 'border-red-500 text-white bg-[#141b2d]'
-                : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-[#121826]'
-            }`}
-          >
-            <span className={tab.isOnAir ? 'text-red-500 animate-pulse' : ''}>
-              {tab.icon}
-            </span>
-            <span>{tab.label}</span>
-
-            {tab.isOnAir && (
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-            )}
-
-            {tab.badge !== undefined && (
-              <span className="text-[10px] bg-black/40 text-slate-400 font-mono px-1.5 py-0.2 rounded-full">
-                {tab.badge}
+      <nav className="bg-[#0e1320] border-b border-white/10 px-6 overflow-x-auto flex items-center justify-between select-none">
+        <div className="flex items-center gap-1">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-4 py-3.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all whitespace-nowrap ${
+                activeTab === tab.id
+                  ? 'border-red-500 text-white bg-[#141b2d]'
+                  : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-[#121826]'
+              }`}
+            >
+              <span className={tab.isOnAir ? 'text-red-500 animate-pulse' : ''}>
+                {tab.icon}
               </span>
-            )}
-          </button>
-        ))}
+              <span>{tab.label}</span>
+
+              {tab.isOnAir && (
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+              )}
+
+              {tab.badge !== undefined && (
+                <span className="text-[10px] bg-black/40 text-slate-400 font-mono px-1.5 py-0.2 rounded-full">
+                  {tab.badge}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Quick Switch to Mobile Controller Deck */}
+        <button
+          onClick={() => setIsMobileMode(true)}
+          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#162035] hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-bold border border-white/10"
+          title="Alternar para visualização de Controle Remoto de Celular"
+        >
+          <Smartphone className="w-3.5 h-3.5 text-amber-400" />
+          <span>Modo Celular</span>
+        </button>
       </nav>
 
       {/* Main Workspace Active Module */}
