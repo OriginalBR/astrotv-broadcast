@@ -16,22 +16,27 @@ import {
   Sliders, 
   Clock, 
   Plus, 
-  Minus,
-  Maximize2,
-  Eye,
-  Monitor,
-  Download
+  Minus, 
+  Maximize2, 
+  Eye, 
+  Monitor, 
+  Download,
+  Palette,
+  ZoomIn,
+  Move
 } from 'lucide-react';
 import { useBroadcastStore } from '../../store/useBroadcastStore';
 import { RenderOverlay } from '../canvas/RenderOverlay';
 import { broadcastBus, ConnectionStatus } from '../../utils/broadcastSync';
 import { ExportModal } from '../modals/ExportModal';
+import { MobileCustomizationView } from './MobileCustomizationView';
 
 interface MobileControlDeckProps {
   onSwitchToDesktop?: () => void;
 }
 
-type MobileTab = 'preview' | 'scoreboard' | 'lowerThirds' | 'transitions' | 'ticker';
+type MobileTab = 'preview' | 'scoreboard' | 'lowerThirds' | 'transitions' | 'ticker' | 'customization';
+type PreviewZoomMode = 'fit' | 'focus-lower' | 'focus-scoreboard';
 
 export const MobileControlDeck: React.FC<MobileControlDeckProps> = ({ onSwitchToDesktop }) => {
   const {
@@ -66,6 +71,7 @@ export const MobileControlDeck: React.FC<MobileControlDeckProps> = ({ onSwitchTo
   const [wsStatus, setWsStatus] = useState<ConnectionStatus>('connecting');
   const [clientCount, setClientCount] = useState<number>(1);
   const [isLandscape, setIsLandscape] = useState(false);
+  const [previewZoom, setPreviewZoom] = useState<PreviewZoomMode>('fit');
 
   // Export Modal state
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -75,20 +81,20 @@ export const MobileControlDeck: React.FC<MobileControlDeckProps> = ({ onSwitchTo
   // References and dynamic scale calculation for pixel-perfect preview
   const previewBoxRef = useRef<HTMLDivElement>(null);
   const fullPreviewRef = useRef<HTMLDivElement>(null);
-  const [previewScale, setPreviewScale] = useState(0.18);
-  const [fullScale, setFullScale] = useState(0.35);
+  const [previewScale, setPreviewScale] = useState(0.20);
+  const [fullScale, setFullScale] = useState(0.40);
 
   // Calculate dynamic scale whenever screen resizes or orientation changes
   useEffect(() => {
     const updateScales = () => {
       setIsLandscape(window.innerWidth > window.innerHeight);
 
-      // Mini preview scale
+      // Mini preview scale (fill width of container edge-to-edge)
       if (previewBoxRef.current) {
         const rect = previewBoxRef.current.getBoundingClientRect();
         const scaleW = rect.width / 1920;
         const scaleH = rect.height / 1080;
-        setPreviewScale(Math.min(scaleW, scaleH) * 0.96);
+        setPreviewScale(Math.min(scaleW, scaleH));
       }
 
       // Full preview tab scale
@@ -96,12 +102,12 @@ export const MobileControlDeck: React.FC<MobileControlDeckProps> = ({ onSwitchTo
         const rect = fullPreviewRef.current.getBoundingClientRect();
         const scaleW = rect.width / 1920;
         const scaleH = rect.height / 1080;
-        setFullScale(Math.min(scaleW, scaleH) * 0.98);
+        setFullScale(Math.min(scaleW, scaleH));
       }
     };
 
     updateScales();
-    const timeout = setTimeout(updateScales, 300);
+    const timeout = setTimeout(updateScales, 200);
     window.addEventListener('resize', updateScales);
     window.addEventListener('orientationchange', updateScales);
 
@@ -110,7 +116,7 @@ export const MobileControlDeck: React.FC<MobileControlDeckProps> = ({ onSwitchTo
       window.removeEventListener('resize', updateScales);
       window.removeEventListener('orientationchange', updateScales);
     };
-  }, [activeTab, isLandscape]);
+  }, [activeTab, isLandscape, previewZoom]);
 
   // WebSocket connection status listener
   useEffect(() => {
@@ -155,9 +161,29 @@ export const MobileControlDeck: React.FC<MobileControlDeckProps> = ({ onSwitchTo
     }
   };
 
+  // Compute transform and origin based on preview zoom mode
+  const getFullPreviewTransform = () => {
+    if (previewZoom === 'focus-lower') {
+      return {
+        transform: `scale(${fullScale * 2.2}) translateY(-25%)`,
+        transformOrigin: 'bottom center',
+      };
+    }
+    if (previewZoom === 'focus-scoreboard') {
+      return {
+        transform: `scale(${fullScale * 2.2}) translate(20%, 20%)`,
+        transformOrigin: 'top left',
+      };
+    }
+    return {
+      transform: `scale(${fullScale})`,
+      transformOrigin: 'center center',
+    };
+  };
+
   return (
     <div className="h-[100dvh] w-screen bg-[#070a12] text-white flex flex-col overflow-hidden select-none touch-manipulation font-sans">
-      {/* 1. Header Bar (Status & Download & Emergency Blackout) */}
+      {/* 1. Header Bar */}
       <header className="h-11 bg-[#0c101a] border-b border-white/10 px-2.5 flex items-center justify-between flex-shrink-0 z-20">
         <div className="flex items-center gap-1.5">
           <div className="flex items-center gap-1.5 bg-gradient-to-r from-red-600 to-slate-900 px-2 py-0.5 rounded-lg shadow text-xs font-black font-condensed tracking-wider uppercase border border-red-500/40">
@@ -176,7 +202,7 @@ export const MobileControlDeck: React.FC<MobileControlDeckProps> = ({ onSwitchTo
         </div>
 
         <div className="flex items-center gap-1.5">
-          {/* Quick Download Button on Mobile */}
+          {/* Quick Download Button */}
           <button
             onClick={handleQuickExportCurrent}
             className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-blue-600 to-cyan-600 active:from-blue-700 active:to-cyan-700 text-white rounded-md text-[11px] font-bold shadow"
@@ -209,71 +235,100 @@ export const MobileControlDeck: React.FC<MobileControlDeckProps> = ({ onSwitchTo
 
       {/* 2. Main Stage (Auto-Adapts to Tab Selection & Orientation) */}
       
-      {/* FULL PREVIEW TAB MODE (Tela cheia de Monitor) */}
+      {/* FULL PREVIEW TAB MODE (Tela Cheia Maximizada com Zoom & Foco) */}
       {activeTab === 'preview' ? (
-        <div ref={fullPreviewRef} className="flex-1 w-full p-3 flex items-center justify-center relative overflow-hidden bg-black bg-studio-grid">
-          <div className="absolute top-4 left-4 z-40 flex items-center gap-2 bg-black/80 backdrop-blur px-3 py-1 rounded-full border border-white/15 text-xs font-black uppercase font-condensed">
-            <span className={`w-2.5 h-2.5 rounded-full ${isAnyOnAir ? 'bg-red-500 animate-ping' : 'bg-slate-500'}`} />
-            <span className={isAnyOnAir ? 'text-red-400' : 'text-slate-400'}>
-              {isAnyOnAir ? 'PROGRAM AO VIVO (1920×1080)' : 'STANDBY (PRONTO)'}
+        <div className="flex-1 w-full h-full flex flex-col overflow-hidden bg-black">
+          {/* Zoom & View Controls Bar */}
+          <div className="h-10 bg-[#0c111e] border-b border-white/10 px-3 flex items-center justify-between flex-shrink-0 z-30">
+            <span className="text-[11px] font-black uppercase text-slate-300 font-condensed tracking-wider">
+              Modo de Visualização:
             </span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setPreviewZoom('fit')}
+                className={`px-2.5 py-1 rounded text-[10px] font-black uppercase font-condensed ${
+                  previewZoom === 'fit' ? 'bg-cyan-600 text-white shadow' : 'bg-[#151c2e] text-slate-400'
+                }`}
+              >
+                16:9 Geral
+              </button>
+              <button
+                onClick={() => setPreviewZoom('focus-lower')}
+                className={`px-2.5 py-1 rounded text-[10px] font-black uppercase font-condensed ${
+                  previewZoom === 'focus-lower' ? 'bg-cyan-600 text-white shadow' : 'bg-[#151c2e] text-slate-400'
+                }`}
+              >
+                Foco Tarjas (2x)
+              </button>
+              <button
+                onClick={() => setPreviewZoom('focus-scoreboard')}
+                className={`px-2.5 py-1 rounded text-[10px] font-black uppercase font-condensed ${
+                  previewZoom === 'focus-scoreboard' ? 'bg-cyan-600 text-white shadow' : 'bg-[#151c2e] text-slate-400'
+                }`}
+              >
+                Foco Placar (2x)
+              </button>
+            </div>
           </div>
 
+          {/* Maximized Preview Frame */}
           <div 
-            style={{
-              width: '1920px',
-              height: '1080px',
-              transform: `scale(${fullScale})`,
-              transformOrigin: 'center center',
-            }}
-            className="pointer-events-none shadow-2xl border-4 border-white/10 rounded-xl overflow-hidden"
+            ref={fullPreviewRef} 
+            className="flex-1 w-full flex items-center justify-center relative overflow-hidden bg-[#030509] bg-studio-grid"
           >
-            <RenderOverlay
-              lowerThird={activeLowerThird}
-              scoreboard={activeScoreboard}
-              ticker={activeTicker}
-              bug={activeBug}
-              countdown={activeCountdown}
-              fullscreen={activeFullscreen}
-              transition={activeTransition}
-              theme={brandTheme}
-              stationName={stationName}
-              isBlackout={isBlackout}
-            />
+            <div 
+              style={{
+                width: '1920px',
+                height: '1080px',
+                position: 'absolute',
+                ...getFullPreviewTransform(),
+                transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+              }}
+              className="pointer-events-none"
+            >
+              <RenderOverlay
+                lowerThird={activeLowerThird}
+                scoreboard={activeScoreboard}
+                ticker={activeTicker}
+                bug={activeBug}
+                countdown={activeCountdown}
+                fullscreen={activeFullscreen}
+                transition={activeTransition}
+                theme={brandTheme}
+                stationName={stationName}
+                isBlackout={isBlackout}
+              />
+            </div>
           </div>
         </div>
+      ) : activeTab === 'customization' ? (
+        /* TAB 6: CUSTOMIZATION / PERSONALIZAÇÃO NO CELULAR */
+        <MobileCustomizationView />
       ) : (
         /* STANDARD DUAL CONTROLLER VIEW (Mini Preview + Dynamic Touch Deck) */
         <div className={`flex-1 flex overflow-hidden ${isLandscape ? 'flex-row' : 'flex-col'}`}>
           
-          {/* Top/Left PGM Live Monitor Miniature Box */}
+          {/* Top/Left PGM Live Monitor Miniature Box (Clean, maximized aspect ratio, no blocking bug) */}
           <div className={`${
             isLandscape 
               ? 'w-[44%] h-full border-r border-white/10 p-2 flex flex-col justify-between' 
-              : 'h-[32%] w-full p-2 flex-shrink-0'
+              : 'h-[36%] w-full p-2 flex-shrink-0'
           }`}>
             <div 
               ref={previewBoxRef}
-              className="relative w-full h-full bg-[#03060c] rounded-lg border-2 border-red-500/60 overflow-hidden shadow-xl flex items-center justify-center bg-studio-grid"
+              className="relative w-full h-full bg-[#03060c] rounded-xl border border-white/15 overflow-hidden shadow-2xl flex items-center justify-center bg-studio-grid"
             >
-              {/* Live Status Pill */}
-              <div className="absolute top-1.5 left-2 z-40 flex items-center gap-1.5 bg-black/85 backdrop-blur px-2 py-0.5 rounded text-[10px] font-black uppercase font-condensed border border-white/10">
-                <span className={`w-2 h-2 rounded-full ${isAnyOnAir ? 'bg-red-500 animate-ping' : 'bg-slate-500'}`} />
-                <span className={isAnyOnAir ? 'text-red-400' : 'text-slate-400'}>
-                  {isAnyOnAir ? 'AO VIVO' : 'STANDBY'}
-                </span>
-              </div>
-
-              {/* Tap to Fullscreen Monitor Button */}
+              {/* Expand to Fullscreen Monitor Button */}
               <button
                 onClick={() => setActiveTab('preview')}
-                className="absolute top-1.5 right-2 z-40 bg-black/70 hover:bg-slate-800 p-1 rounded text-slate-300 border border-white/10"
+                className="absolute top-2 right-2 z-40 bg-black/80 hover:bg-slate-800 active:bg-cyan-600 p-1.5 rounded-lg text-slate-200 border border-white/20 shadow-lg flex items-center gap-1 text-[10px] font-bold"
                 title="Expandir Preview em Tela Cheia"
               >
-                <Maximize2 className="w-3 h-3" />
+                <Maximize2 className="w-3.5 h-3.5 text-cyan-400" />
+                <span className="font-condensed uppercase tracking-wider">MAXIMIZAR</span>
               </button>
 
-              {/* Dynamically Scaled Program Canvas */}
+              {/* Dynamically Scaled Program Canvas (Unobstructed) */}
               <div 
                 style={{
                   width: '1920px',
@@ -370,7 +425,7 @@ export const MobileControlDeck: React.FC<MobileControlDeckProps> = ({ onSwitchTo
                 </div>
 
                 {/* Match Clock & Action Row */}
-                <div className="flex items-center gap-2 h-13 flex-shrink-0">
+                <div className="flex items-center gap-2 h-12 flex-shrink-0">
                   <button
                     onClick={toggleScoreboardTimer}
                     className={`flex-1 h-full rounded-xl flex items-center justify-center gap-2 font-black text-sm uppercase font-condensed shadow-lg border transition-all ${
@@ -572,61 +627,72 @@ export const MobileControlDeck: React.FC<MobileControlDeckProps> = ({ onSwitchTo
         </div>
       )}
 
-      {/* 3. Fixed Native Bottom Navigation Bar */}
-      <nav className="h-16 bg-[#090d16] border-t border-white/10 grid grid-cols-5 px-1 z-30 flex-shrink-0">
+      {/* 3. Fixed Native Bottom Navigation Bar (6 Tabs: PREVIEW, PLACAR, TARJAS, VINHETAS, TICKER, AJUSTES) */}
+      <nav className="h-16 bg-[#090d16] border-t border-white/10 grid grid-cols-6 px-0.5 z-30 flex-shrink-0">
         {/* Tab: Preview Monitor */}
         <button
           onClick={() => setActiveTab('preview')}
-          className={`flex flex-col items-center justify-center gap-1 transition-all ${
+          className={`flex flex-col items-center justify-center gap-0.5 transition-all ${
             activeTab === 'preview' ? 'text-cyan-400 bg-white/5 font-bold' : 'text-slate-400 active:text-white'
           }`}
         >
-          <Eye className="w-5 h-5" />
-          <span className="text-[9px] font-black uppercase tracking-wider font-condensed">PREVIEW</span>
+          <Eye className="w-4 h-4" />
+          <span className="text-[8px] font-black uppercase tracking-wider font-condensed">PREVIEW</span>
         </button>
 
         {/* Tab: Placar */}
         <button
           onClick={() => setActiveTab('scoreboard')}
-          className={`flex flex-col items-center justify-center gap-1 transition-all ${
+          className={`flex flex-col items-center justify-center gap-0.5 transition-all ${
             activeTab === 'scoreboard' ? 'text-amber-400 bg-white/5 font-bold' : 'text-slate-400 active:text-white'
           }`}
         >
-          <Trophy className="w-5 h-5" />
-          <span className="text-[9px] font-black uppercase tracking-wider font-condensed">PLACAR</span>
+          <Trophy className="w-4 h-4" />
+          <span className="text-[8px] font-black uppercase tracking-wider font-condensed">PLACAR</span>
         </button>
 
         {/* Tab: Tarjas */}
         <button
           onClick={() => setActiveTab('lowerThirds')}
-          className={`flex flex-col items-center justify-center gap-1 transition-all ${
+          className={`flex flex-col items-center justify-center gap-0.5 transition-all ${
             activeTab === 'lowerThirds' ? 'text-red-400 bg-white/5 font-bold' : 'text-slate-400 active:text-white'
           }`}
         >
-          <User className="w-5 h-5" />
-          <span className="text-[9px] font-black uppercase tracking-wider font-condensed">TARJAS GC</span>
+          <User className="w-4 h-4" />
+          <span className="text-[8px] font-black uppercase tracking-wider font-condensed">TARJAS</span>
         </button>
 
         {/* Tab: Vinhetas */}
         <button
           onClick={() => setActiveTab('transitions')}
-          className={`flex flex-col items-center justify-center gap-1 transition-all ${
+          className={`flex flex-col items-center justify-center gap-0.5 transition-all ${
             activeTab === 'transitions' ? 'text-yellow-400 bg-white/5 font-bold' : 'text-slate-400 active:text-white'
           }`}
         >
-          <Sparkles className="w-5 h-5" />
-          <span className="text-[9px] font-black uppercase tracking-wider font-condensed">VINHETAS</span>
+          <Sparkles className="w-4 h-4" />
+          <span className="text-[8px] font-black uppercase tracking-wider font-condensed">VINHETAS</span>
         </button>
 
         {/* Tab: Ticker & Logos */}
         <button
           onClick={() => setActiveTab('ticker')}
-          className={`flex flex-col items-center justify-center gap-1 transition-all ${
+          className={`flex flex-col items-center justify-center gap-0.5 transition-all ${
             activeTab === 'ticker' ? 'text-blue-400 bg-white/5 font-bold' : 'text-slate-400 active:text-white'
           }`}
         >
-          <Sliders className="w-5 h-5" />
-          <span className="text-[9px] font-black uppercase tracking-wider font-condensed">TICKER</span>
+          <Sliders className="w-4 h-4" />
+          <span className="text-[8px] font-black uppercase tracking-wider font-condensed">TICKER</span>
+        </button>
+
+        {/* Tab: Personalização / Ajustes */}
+        <button
+          onClick={() => setActiveTab('customization')}
+          className={`flex flex-col items-center justify-center gap-0.5 transition-all ${
+            activeTab === 'customization' ? 'text-emerald-400 bg-white/5 font-bold' : 'text-slate-400 active:text-white'
+          }`}
+        >
+          <Palette className="w-4 h-4" />
+          <span className="text-[8px] font-black uppercase tracking-wider font-condensed">AJUSTES</span>
         </button>
       </nav>
 
