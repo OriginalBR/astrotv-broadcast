@@ -124,8 +124,8 @@ export function generateStandaloneHtmlBundle(
         <div id="lower-third" class="lower-third-container template-minimal ${lt.animation?.entryType || 'slide'}">
           <div class="minimal-pill" style="background: ${brandPrimary}"></div>
           <div class="minimal-content">
-            <div class="title-text minimal-title">${lt.title || 'DESTAQUE PRINCIPAL'}</div>
-            <div class="subtitle-text minimal-subtitle">${lt.subtitle || 'Informações complementares'}</div>
+            <div class="minimal-title">${lt.title || 'DESTAQUE PRINCIPAL'}</div>
+            <div class="minimal-subtitle">${lt.subtitle || 'Informações complementares'}</div>
           </div>
         </div>
       `;
@@ -300,6 +300,13 @@ export function generateStandaloneHtmlBundle(
       overflow: hidden;
     }
 
+    /* Lower Third Base Styles */
+    .lower-third-container {
+      width: max-content;
+      min-width: 420px;
+      max-width: 1400px;
+    }
+
     /* Standard News Lower Third */
     .lower-third-container.template-standard {
       position: absolute;
@@ -307,7 +314,6 @@ export function generateStandaloneHtmlBundle(
       left: 80px;
       display: flex;
       align-items: stretch;
-      max-width: 1200px;
       border-radius: 4px;
       overflow: hidden;
       box-shadow: 0 20px 50px rgba(0,0,0,0.85);
@@ -317,11 +323,11 @@ export function generateStandaloneHtmlBundle(
     .gold-edge { width: 8px; flex-shrink: 0; }
     .content-box {
       background: linear-gradient(90deg, rgba(12,16,26,0.98), rgba(19,25,41,0.96));
-      padding: 20px 36px;
-      min-width: 480px;
+      padding: 18px 36px;
       display: flex;
       flex-direction: column;
       justify-content: center;
+      gap: 4px;
     }
     .tag-badge {
       align-self: flex-start;
@@ -332,23 +338,30 @@ export function generateStandaloneHtmlBundle(
       letter-spacing: 1.5px;
       padding: 3px 10px;
       border-radius: 2px;
-      margin-bottom: 6px;
+      margin-bottom: 2px;
       font-family: 'Barlow Condensed', sans-serif;
+      white-space: nowrap;
     }
     .title-text {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 42px;
+      font-size: 40px;
       font-weight: 900;
       text-transform: uppercase;
       line-height: 1.1;
       color: #fff;
       letter-spacing: 0.5px;
+      white-space: nowrap;
+      margin: 0;
+      padding: 0;
     }
     .subtitle-text {
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 600;
       color: ${brandSubtext};
-      margin-top: 4px;
+      white-space: nowrap;
+      line-height: 1.2;
+      margin: 0;
+      padding: 0;
     }
 
     /* Interview with Avatar Lower Third */
@@ -369,14 +382,13 @@ export function generateStandaloneHtmlBundle(
     .avatar-img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 4px solid; }
     .avatar-placeholder { width: 90px; height: 90px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 38px; font-weight: 900; color: #fff; }
     .avatar-star { position: absolute; bottom: 0; right: 0; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #fff; border: 2px solid #090d16; }
-    .content-box-interview { display: flex; flex-direction: column; }
+    .content-box-interview { display: flex; flex-direction: column; justify-content: center; gap: 4px; }
 
     /* Breaking News Bar Lower Third */
     .lower-third-container.template-breaking {
       position: absolute;
       bottom: 80px;
       left: 80px;
-      max-width: 1200px;
       border-radius: 6px;
       overflow: hidden;
       border: 2px solid ${brandPrimary};
@@ -393,15 +405,20 @@ export function generateStandaloneHtmlBundle(
       letter-spacing: 2px;
       text-transform: uppercase;
       font-family: 'Barlow Condensed', sans-serif;
+      white-space: nowrap;
+      gap: 16px;
     }
-    .breaking-pulse-box { display: flex; align-items: center; gap: 8px; }
+    .breaking-pulse-box { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
     .breaking-alert-icon { font-size: 16px; }
-    .breaking-edition { font-size: 11px; opacity: 0.85; font-family: monospace; }
+    .breaking-edition { font-size: 11px; opacity: 0.85; font-family: monospace; white-space: nowrap; }
     .breaking-body {
       background: linear-gradient(90deg, rgba(10,13,22,0.98), rgba(19,25,41,0.96));
       padding: 18px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
-    .breaking-title { color: #fff; font-size: 42px; }
+    .breaking-title { color: #fff; font-size: 40px; white-space: nowrap; }
 
     /* Quote Card Lower Third */
     .lower-third-container.template-quote {
@@ -412,16 +429,15 @@ export function generateStandaloneHtmlBundle(
       padding: 24px 36px;
       border-radius: 12px;
       border-left: 8px solid;
-      max-width: 1000px;
       display: flex;
       align-items: flex-start;
       gap: 16px;
       box-shadow: 0 20px 50px rgba(0,0,0,0.85);
     }
     .quote-icon { font-size: 48px; line-height: 1; font-family: serif; font-weight: 900; }
-    .quote-content { display: flex; flex-direction: column; }
-    .quote-text { font-size: 30px; font-weight: 700; font-style: italic; color: #fff; line-height: 1.2; }
-    .quote-author { font-size: 20px; font-weight: 900; font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; margin-top: 8px; letter-spacing: 1px; }
+    .quote-content { display: flex; flex-direction: column; justify-content: center; gap: 6px; }
+    .quote-text { font-size: 28px; font-weight: 700; font-style: italic; color: #fff; line-height: 1.2; white-space: nowrap; }
+    .quote-author { font-size: 20px; font-weight: 900; font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }
 
     /* Modern Minimal Lower Third */
     .lower-third-container.template-minimal {
@@ -431,16 +447,37 @@ export function generateStandaloneHtmlBundle(
       display: flex;
       align-items: center;
       gap: 16px;
-      background: rgba(15,23,42,0.92);
+      background: rgba(15,23,42,0.95);
       border: 1px solid rgba(255,255,255,0.2);
-      padding: 14px 28px;
+      padding: 16px 32px;
       border-radius: 16px;
       box-shadow: 0 20px 45px rgba(0,0,0,0.85);
+      min-width: 380px;
     }
-    .minimal-pill { width: 8px; height: 48px; border-radius: 4px; }
-    .minimal-content { display: flex; flex-direction: column; }
-    .minimal-title { font-size: 32px; letter-spacing: 1px; }
-    .minimal-subtitle { font-size: 17px; }
+    .minimal-pill { width: 8px; height: 52px; border-radius: 4px; flex-shrink: 0; }
+    .minimal-content { display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+    .minimal-title { 
+      font-family: 'Barlow Condensed', sans-serif; 
+      font-size: 34px; 
+      font-weight: 900; 
+      text-transform: uppercase; 
+      color: #ffffff; 
+      letter-spacing: 1px; 
+      white-space: nowrap; 
+      line-height: 1.1; 
+      margin: 0; 
+      padding: 0; 
+    }
+    .minimal-subtitle { 
+      font-size: 17px; 
+      font-weight: 600; 
+      color: #94a3b8; 
+      letter-spacing: 0.3px; 
+      white-space: nowrap; 
+      line-height: 1.2; 
+      margin: 0; 
+      padding: 0; 
+    }
 
     /* School Profile Lower Third */
     .lower-third-container.template-profile {
@@ -452,11 +489,10 @@ export function generateStandaloneHtmlBundle(
       border-top: 6px solid;
       background: linear-gradient(90deg, rgba(10,13,22,0.98), rgba(19,25,41,0.96));
       box-shadow: 0 20px 50px rgba(0,0,0,0.85);
-      min-width: 480px;
     }
-    .profile-header { padding: 6px 24px; }
-    .profile-badge { color: #fff; font-size: 13px; font-weight: 900; text-transform: uppercase; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1.5px; }
-    .profile-body { padding: 16px 28px; }
+    .profile-header { padding: 6px 24px; white-space: nowrap; }
+    .profile-badge { color: #fff; font-size: 13px; font-weight: 900; text-transform: uppercase; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1.5px; white-space: nowrap; }
+    .profile-body { padding: 16px 28px; display: flex; flex-direction: column; gap: 4px; }
 
     /* Scoreboard Styles */
     .scoreboard-container.layout-compact {

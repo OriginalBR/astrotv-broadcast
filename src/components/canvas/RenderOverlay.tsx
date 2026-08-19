@@ -121,17 +121,17 @@ const LowerThirdRenderer: React.FC<{ data: LowerThirdData; theme: OverlayTheme; 
     >
       {/* Template: Standard News */}
       {data.template === 'standard-news' && (
-        <div className="flex items-stretch shadow-2xl rounded-sm overflow-hidden border border-white/20 backdrop-blur-2xl broadcast-shimmer">
+        <div className="flex items-stretch shadow-2xl rounded-sm overflow-hidden border border-white/20 backdrop-blur-2xl broadcast-shimmer min-w-[440px] max-w-[1300px] w-max">
           <div 
             className="w-4 flex-shrink-0 animate-pulse-fast" 
             style={{ backgroundColor: primaryColor }} 
           />
           
-          <div className="bg-gradient-to-r from-[#0c101a]/98 via-[#131929]/95 to-[#0e1422]/95 px-8 py-5 flex flex-col justify-center min-w-[440px]">
+          <div className="bg-gradient-to-r from-[#0c101a]/98 via-[#131929]/95 to-[#0e1422]/95 px-8 py-5 flex flex-col justify-center">
             {data.tag && (
               <div className="flex items-center gap-2 mb-1.5">
                 <span 
-                  className="px-3 py-0.5 text-xs font-black uppercase tracking-widest text-white rounded-xs shadow-md"
+                  className="px-3 py-0.5 text-xs font-black uppercase tracking-widest text-white rounded-xs shadow-md whitespace-nowrap"
                   style={{ backgroundColor: data.tagColor || primaryColor }}
                 >
                   {data.tag}
@@ -139,10 +139,10 @@ const LowerThirdRenderer: React.FC<{ data: LowerThirdData; theme: OverlayTheme; 
                 <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
               </div>
             )}
-            <h2 className="text-3xl lg:text-4xl font-black uppercase tracking-tight text-white leading-none font-condensed drop-shadow-md">
+            <h2 className="text-3xl lg:text-4xl font-black uppercase tracking-tight text-white leading-tight font-condensed drop-shadow-md whitespace-nowrap">
               {data.title}
             </h2>
-            <p className="text-lg lg:text-xl font-semibold text-slate-300 mt-1">
+            <p className="text-lg lg:text-xl font-semibold text-slate-300 mt-1 whitespace-nowrap">
               {data.subtitle}
             </p>
           </div>
@@ -153,9 +153,9 @@ const LowerThirdRenderer: React.FC<{ data: LowerThirdData; theme: OverlayTheme; 
 
       {/* Template: Interview with Avatar */}
       {data.template === 'interview-avatar' && (
-        <div className="flex items-center gap-5 bg-gradient-to-r from-[#090d16]/98 via-[#141b2e]/95 to-[#0a0f1d]/90 p-4 pr-10 rounded-xl shadow-2xl border border-white/20 backdrop-blur-2xl broadcast-shimmer">
+        <div className="flex items-center gap-5 bg-gradient-to-r from-[#090d16]/98 via-[#141b2e]/95 to-[#0a0f1d]/90 p-4 pr-10 rounded-xl shadow-2xl border border-white/20 backdrop-blur-2xl broadcast-shimmer min-w-[440px] max-w-[1300px] w-max">
           {data.avatarUrl ? (
-            <div className="relative">
+            <div className="relative flex-shrink-0">
               <img 
                 src={data.avatarUrl} 
                 alt={data.title} 
@@ -171,25 +171,25 @@ const LowerThirdRenderer: React.FC<{ data: LowerThirdData; theme: OverlayTheme; 
             </div>
           ) : (
             <div 
-              className="w-20 h-20 rounded-full flex items-center justify-center font-black text-3xl text-white shadow-inner"
+              className="w-20 h-20 rounded-full flex items-center justify-center font-black text-3xl text-white shadow-inner flex-shrink-0"
               style={{ backgroundColor: primaryColor }}
             >
               {data.title.charAt(0)}
             </div>
           )}
-          <div>
+          <div className="flex flex-col justify-center">
             {data.tag && (
               <span 
-                className="inline-block px-3 py-0.5 text-xs font-black uppercase tracking-wider text-black rounded mb-1 font-condensed shadow"
+                className="inline-block self-start px-3 py-0.5 text-xs font-black uppercase tracking-wider text-black rounded mb-1 font-condensed shadow whitespace-nowrap"
                 style={{ backgroundColor: data.tagColor || accentColor }}
               >
                 {data.tag}
               </span>
             )}
-            <h2 className="text-3xl lg:text-4xl font-black uppercase tracking-tight text-white leading-tight font-condensed">
+            <h2 className="text-3xl lg:text-4xl font-black uppercase tracking-tight text-white leading-tight font-condensed whitespace-nowrap">
               {data.title}
             </h2>
-            <p className="text-lg font-medium text-slate-300">
+            <p className="text-lg font-medium text-slate-300 mt-0.5 whitespace-nowrap">
               {data.subtitle}
             </p>
           </div>
@@ -198,20 +198,20 @@ const LowerThirdRenderer: React.FC<{ data: LowerThirdData; theme: OverlayTheme; 
 
       {/* Template: Breaking Bar (Plantão Urgente) */}
       {data.template === 'breaking-bar' && (
-        <div className="shadow-2xl overflow-hidden rounded-md border-2 border-red-600 broadcast-glow-red broadcast-shimmer">
+        <div className="shadow-2xl overflow-hidden rounded-md border-2 border-red-600 broadcast-glow-red broadcast-shimmer min-w-[440px] max-w-[1300px] w-max">
           <div className="bg-red-600 text-white px-6 py-2 flex items-center justify-between font-black text-sm tracking-widest uppercase animate-pulse-fast">
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full bg-white animate-ping" />
               <AlertTriangle className="w-4 h-4" />
-              <span>{data.tag || 'PLANTÃO URGENTE'}</span>
+              <span className="whitespace-nowrap">{data.tag || 'PLANTÃO URGENTE'}</span>
             </div>
-            <span className="text-[11px] font-mono opacity-80">ED. EXTRAORDINÁRIA</span>
+            <span className="text-[11px] font-mono opacity-80 ml-6 whitespace-nowrap">ED. EXTRAORDINÁRIA</span>
           </div>
           <div className="bg-gradient-to-r from-[#0a0d16]/98 to-[#131929]/95 px-8 py-5 backdrop-blur-2xl">
-            <h2 className="text-3xl lg:text-4xl font-black uppercase tracking-tight text-red-50 leading-none font-condensed drop-shadow">
+            <h2 className="text-3xl lg:text-4xl font-black uppercase tracking-tight text-red-50 leading-tight font-condensed drop-shadow whitespace-nowrap">
               {data.title}
             </h2>
-            <p className="text-lg font-medium text-slate-300 mt-1.5">
+            <p className="text-lg font-medium text-slate-300 mt-1 whitespace-nowrap">
               {data.subtitle}
             </p>
           </div>
@@ -220,14 +220,14 @@ const LowerThirdRenderer: React.FC<{ data: LowerThirdData; theme: OverlayTheme; 
 
       {/* Template: Quote Card */}
       {data.template === 'quote' && (
-        <div className="bg-gradient-to-r from-[#0d121f]/98 to-[#141b2c]/95 p-6 rounded-lg shadow-2xl border-l-8 border-yellow-400 max-w-[920px] backdrop-blur-xl broadcast-shimmer">
+        <div className="bg-gradient-to-r from-[#0d121f]/98 to-[#141b2c]/95 p-6 rounded-lg shadow-2xl border-l-8 border-yellow-400 max-w-[1100px] w-max backdrop-blur-xl broadcast-shimmer">
           <div className="flex items-start gap-4">
             <Quote className="w-12 h-12 text-yellow-400 flex-shrink-0 opacity-80" />
-            <div>
-              <p className="text-2xl lg:text-3xl font-bold italic text-white tracking-tight leading-snug">
+            <div className="flex flex-col justify-center">
+              <p className="text-2xl lg:text-3xl font-bold italic text-white tracking-tight leading-snug whitespace-nowrap">
                 "{data.title}"
               </p>
-              <p className="text-lg font-bold text-yellow-400 mt-2 uppercase tracking-wider font-condensed">
+              <p className="text-lg font-bold text-yellow-400 mt-2 uppercase tracking-wider font-condensed whitespace-nowrap">
                 — {data.subtitle}
               </p>
             </div>
@@ -237,13 +237,13 @@ const LowerThirdRenderer: React.FC<{ data: LowerThirdData; theme: OverlayTheme; 
 
       {/* Template: Modern Minimal */}
       {data.template === 'modern-minimal' && (
-        <div className="flex items-center gap-4 bg-slate-900/90 border border-slate-700/60 px-6 py-4 rounded-xl shadow-2xl backdrop-blur-2xl broadcast-shimmer">
-          <div className="w-2.5 h-11 rounded-full animate-pulse-fast" style={{ backgroundColor: primaryColor }} />
-          <div>
-            <h2 className="text-2xl lg:text-3xl font-extrabold text-white uppercase tracking-wider font-condensed">
+        <div className="flex items-center gap-4 bg-slate-900/95 border border-slate-700/60 px-7 py-4 rounded-2xl shadow-2xl backdrop-blur-2xl broadcast-shimmer min-w-[380px] max-w-[1300px] w-max">
+          <div className="w-2.5 h-12 rounded-full flex-shrink-0 animate-pulse-fast" style={{ backgroundColor: primaryColor }} />
+          <div className="flex flex-col justify-center">
+            <h2 className="text-2xl lg:text-3xl font-extrabold text-white uppercase tracking-wider font-condensed whitespace-nowrap leading-tight drop-shadow">
               {data.title}
             </h2>
-            <p className="text-sm font-semibold text-slate-400 tracking-wide">
+            <p className="text-sm font-semibold text-slate-300 tracking-wide whitespace-nowrap mt-0.5">
               {data.subtitle}
             </p>
           </div>
@@ -252,25 +252,25 @@ const LowerThirdRenderer: React.FC<{ data: LowerThirdData; theme: OverlayTheme; 
 
       {/* Template: School / Imprensa Astro Profile */}
       {data.template === 'school-profile' && (
-        <div className="flex items-center gap-6 bg-gradient-to-r from-[#080e24]/98 via-[#131d3b]/95 to-[#0b132b]/95 p-5 rounded-2xl border border-cyan-400/40 shadow-2xl backdrop-blur-2xl broadcast-shimmer">
+        <div className="flex items-center gap-6 bg-gradient-to-r from-[#080e24]/98 via-[#131d3b]/95 to-[#0b132b]/95 p-5 pr-8 rounded-2xl border border-cyan-400/40 shadow-2xl backdrop-blur-2xl broadcast-shimmer min-w-[440px] max-w-[1300px] w-max">
           {data.avatarUrl && (
             <img 
               src={data.avatarUrl} 
               alt={data.title} 
-              className="w-20 h-20 rounded-2xl object-cover ring-4 ring-cyan-400 shadow-xl"
+              className="w-20 h-20 rounded-2xl object-cover ring-4 ring-cyan-400 shadow-xl flex-shrink-0"
             />
           )}
-          <div>
+          <div className="flex flex-col justify-center">
             <div className="flex items-center gap-2 mb-1.5">
-              <span className="bg-cyan-500 text-black px-2.5 py-0.5 text-xs font-black rounded uppercase tracking-wider shadow">
+              <span className="bg-cyan-500 text-black px-2.5 py-0.5 text-xs font-black rounded uppercase tracking-wider shadow whitespace-nowrap">
                 {data.tag || 'IMPRENSA ASTRO'}
               </span>
-              <span className="text-xs text-cyan-300 font-bold uppercase tracking-widest">★ DESTAQUE ACADÊMICO</span>
+              <span className="text-xs text-cyan-300 font-bold uppercase tracking-widest whitespace-nowrap">★ DESTAQUE ACADÊMICO</span>
             </div>
-            <h2 className="text-3xl lg:text-4xl font-black uppercase text-white font-condensed tracking-wide">
+            <h2 className="text-3xl lg:text-4xl font-black uppercase text-white font-condensed tracking-wide whitespace-nowrap leading-tight">
               {data.title}
             </h2>
-            <p className="text-base font-semibold text-cyan-100/90">
+            <p className="text-base font-semibold text-cyan-100/90 mt-0.5 whitespace-nowrap">
               {data.subtitle}
             </p>
           </div>
