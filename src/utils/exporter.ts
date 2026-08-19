@@ -55,63 +55,160 @@ export async function downloadJson(data: any, filename: string) {
   await triggerFileDownload(blob, finalName, 'application/json');
 }
 
-// Generate Standalone HTML/CSS/JS OBS Browser Source Bundle
+// Generate Standalone HTML/CSS/JS OBS Browser Source Bundle with ALL Template Styles
 export function generateStandaloneHtmlBundle(
   category: 'lowerThird' | 'scoreboard' | 'ticker' | 'bug' | 'countdown' | 'fullscreen',
   data: any,
   theme: OverlayTheme
 ): string {
-  const brandPrimary = theme.primaryColor || '#e63946';
-  const brandSecondary = theme.secondaryColor || '#073b4c';
-  const brandAccent = theme.accentColor || '#ffd166';
+  const brandPrimary = data?.customTheme?.primaryColor || theme.primaryColor || '#e63946';
+  const brandSecondary = data?.customTheme?.secondaryColor || theme.secondaryColor || '#073b4c';
+  const brandAccent = data?.customTheme?.accentColor || theme.accentColor || '#ffd166';
   const brandText = theme.textColor || '#ffffff';
   const brandSubtext = theme.subtextColor || '#94a3b8';
   const fontFamily = theme.fontFamily || 'Outfit, sans-serif';
 
   let bodyContent = '';
 
-  // 1. Lower Third Standalone HTML
+  // 1. Lower Third Templates
   if (category === 'lowerThird') {
     const lt = data as LowerThirdData;
+    const template = lt.template || 'standard-news';
     const tagBg = lt.tagColor || brandPrimary;
-    bodyContent = `
-      <div id="lower-third" class="lower-third-container ${lt.animation?.entryType || 'slide'}">
-        <div class="accent-bar" style="background: ${brandPrimary}"></div>
-        <div class="content-box">
-          ${lt.tag ? `<div class="tag-badge" style="background: ${tagBg}">${lt.tag}</div>` : ''}
-          <div class="title-text">${lt.title || 'MANCHETE PRINCIPAL'}</div>
-          <div class="subtitle-text">${lt.subtitle || 'Subtítulo e detalhes da reportagem'}</div>
+
+    if (template === 'interview-avatar') {
+      bodyContent = `
+        <div id="lower-third" class="lower-third-container template-interview ${lt.animation?.entryType || 'slide'}">
+          <div class="avatar-box">
+            ${lt.avatarUrl 
+              ? `<img src="${lt.avatarUrl}" class="avatar-img" style="border-color: ${brandAccent}" alt="Avatar" />` 
+              : `<div class="avatar-placeholder" style="background: ${brandPrimary}">${(lt.title || 'A').charAt(0)}</div>`}
+            <div class="avatar-star" style="background: ${brandPrimary}">★</div>
+          </div>
+          <div class="content-box-interview">
+            ${lt.tag ? `<div class="tag-badge" style="background: ${tagBg}">${lt.tag}</div>` : ''}
+            <div class="title-text">${lt.title || 'NOME DO ENTREVISTADO'}</div>
+            <div class="subtitle-text">${lt.subtitle || 'Cargo ou Especialidade'}</div>
+          </div>
         </div>
-        <div class="gold-edge" style="background: ${brandAccent}"></div>
-      </div>
-    `;
+      `;
+    } else if (template === 'breaking-bar') {
+      bodyContent = `
+        <div id="lower-third" class="lower-third-container template-breaking ${lt.animation?.entryType || 'slide'}">
+          <div class="breaking-header" style="background: ${brandPrimary}">
+            <div class="breaking-pulse-box">
+              <span class="live-dot"></span>
+              <span class="breaking-alert-icon">⚠</span>
+              <span>${lt.tag || 'PLANTÃO URGENTE'}</span>
+            </div>
+            <span class="breaking-edition">EDIÇÃO EXTRAORDINÁRIA</span>
+          </div>
+          <div class="breaking-body">
+            <div class="title-text breaking-title">${lt.title || 'NOTÍCIA DE ÚLTIMA HORA'}</div>
+            <div class="subtitle-text">${lt.subtitle || 'Informações ao vivo da redação'}</div>
+          </div>
+        </div>
+      `;
+    } else if (template === 'quote') {
+      bodyContent = `
+        <div id="lower-third" class="lower-third-container template-quote ${lt.animation?.entryType || 'slide'}" style="border-left-color: ${brandAccent}">
+          <div class="quote-icon" style="color: ${brandAccent}">“</div>
+          <div class="quote-content">
+            <div class="quote-text">"${lt.title || 'Declaração ou frase de impacto'}"</div>
+            <div class="quote-author" style="color: ${brandAccent}">— ${lt.subtitle || 'Autor da citação'}</div>
+          </div>
+        </div>
+      `;
+    } else if (template === 'modern-minimal') {
+      bodyContent = `
+        <div id="lower-third" class="lower-third-container template-minimal ${lt.animation?.entryType || 'slide'}">
+          <div class="minimal-pill" style="background: ${brandPrimary}"></div>
+          <div class="minimal-content">
+            <div class="title-text minimal-title">${lt.title || 'DESTAQUE PRINCIPAL'}</div>
+            <div class="subtitle-text minimal-subtitle">${lt.subtitle || 'Informações complementares'}</div>
+          </div>
+        </div>
+      `;
+    } else if (template === 'school-profile') {
+      bodyContent = `
+        <div id="lower-third" class="lower-third-container template-profile ${lt.animation?.entryType || 'slide'}" style="border-top-color: ${brandPrimary}">
+          <div class="profile-header" style="background: ${brandPrimary}">
+            <span class="profile-badge">${lt.tag || 'IMPRENSA ASTRO'}</span>
+          </div>
+          <div class="profile-body">
+            <div class="title-text">${lt.title || 'NOME DO ESTUDANTE / PROFESSOR'}</div>
+            <div class="subtitle-text">${lt.subtitle || 'Série / Turma / Matéria'}</div>
+          </div>
+        </div>
+      `;
+    } else {
+      // Standard News Default
+      bodyContent = `
+        <div id="lower-third" class="lower-third-container template-standard ${lt.animation?.entryType || 'slide'}">
+          <div class="accent-bar" style="background: ${brandPrimary}"></div>
+          <div class="content-box">
+            ${lt.tag ? `<div class="tag-badge" style="background: ${tagBg}">${lt.tag}</div>` : ''}
+            <div class="title-text">${lt.title || 'MANCHETE PRINCIPAL'}</div>
+            <div class="subtitle-text">${lt.subtitle || 'Subtítulo e detalhes da reportagem'}</div>
+          </div>
+          <div class="gold-edge" style="background: ${brandAccent}"></div>
+        </div>
+      `;
+    }
   } else if (category === 'scoreboard') {
     const sb = data as ScoreboardData;
     const teamAColor = sb.teamA?.color || brandPrimary;
     const teamBColor = sb.teamB?.color || '#118ab2';
     const timeFormatted = `${String(sb.matchTime?.minutes || 0).padStart(2, '0')}:${String(sb.matchTime?.seconds || 0).padStart(2, '0')}`;
-    bodyContent = `
-      <div id="scoreboard" class="scoreboard-container compact-bug ${sb.animation?.entryType || 'slide'}">
-        <div class="sb-header">
-          <span class="sb-clock" id="match-clock" style="color: ${brandAccent}">${timeFormatted}</span>
-          <span class="sb-period">${sb.matchTime?.period || '1º TEMPO'}</span>
-        </div>
-        <div class="team-row team-a">
-          <div class="team-info">
-            <span class="team-color" style="background: ${teamAColor}"></span>
-            <span class="team-name">${sb.teamA?.shortName || sb.teamA?.name || 'TIME A'}</span>
+    const layout = sb.layout || 'compact-bug';
+
+    if (layout === 'bottom-bar') {
+      bodyContent = `
+        <div id="scoreboard" class="scoreboard-container layout-bottom-bar ${sb.animation?.entryType || 'slide'}">
+          <div class="sb-bottom-box">
+            <div class="sb-time-col">
+              <div class="sb-time" style="color: ${brandAccent}">${timeFormatted}</div>
+              <div class="sb-period">${sb.matchTime?.period || '1º TEMPO'}</div>
+            </div>
+            <div class="sb-team-side">
+              <span class="team-color" style="background: ${teamAColor}"></span>
+              <span class="team-name">${sb.teamA?.name || 'TIME A'}</span>
+              <span class="team-score" style="color: ${brandAccent}">${sb.teamA?.score ?? 0}</span>
+            </div>
+            <div class="sb-divider">✕</div>
+            <div class="sb-team-side">
+              <span class="team-score" style="color: ${brandAccent}">${sb.teamB?.score ?? 0}</span>
+              <span class="team-name">${sb.teamB?.name || 'TIME B'}</span>
+              <span class="team-color" style="background: ${teamBColor}"></span>
+            </div>
           </div>
-          <span class="team-score" id="score-a" style="color: ${brandAccent}">${sb.teamA?.score ?? 0}</span>
         </div>
-        <div class="team-row team-b">
-          <div class="team-info">
-            <span class="team-color" style="background: ${teamBColor}"></span>
-            <span class="team-name">${sb.teamB?.shortName || sb.teamB?.name || 'TIME B'}</span>
+      `;
+    } else {
+      // Compact Bug Default
+      bodyContent = `
+        <div id="scoreboard" class="scoreboard-container layout-compact ${sb.animation?.entryType || 'slide'}">
+          <div class="sb-header">
+            <span class="sb-clock" id="match-clock" style="color: ${brandAccent}">${timeFormatted}</span>
+            <span class="sb-period">${sb.matchTime?.period || '1º TEMPO'}</span>
           </div>
-          <span class="team-score" id="score-b" style="color: ${brandAccent}">${sb.teamB?.score ?? 0}</span>
+          <div class="team-row team-a">
+            <div class="team-info">
+              <span class="team-color" style="background: ${teamAColor}"></span>
+              <span class="team-name">${sb.teamA?.shortName || sb.teamA?.name || 'TIME A'}</span>
+            </div>
+            <span class="team-score" id="score-a" style="color: ${brandAccent}">${sb.teamA?.score ?? 0}</span>
+          </div>
+          <div class="team-row team-b">
+            <div class="team-info">
+              <span class="team-color" style="background: ${teamBColor}"></span>
+              <span class="team-name">${sb.teamB?.shortName || sb.teamB?.name || 'TIME B'}</span>
+            </div>
+            <span class="team-score" id="score-b" style="color: ${brandAccent}">${sb.teamB?.score ?? 0}</span>
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    }
   } else if (category === 'ticker') {
     const tk = data as TickerData;
     const rawItems = (tk.items && tk.items.length > 0) ? tk.items : [
@@ -126,7 +223,7 @@ export function generateStandaloneHtmlBundle(
     `).join('');
 
     bodyContent = `
-      <div id="ticker" class="ticker-container ${tk.animation?.entryType || 'slide'}">
+      <div id="ticker" class="ticker-container ${tk.animation?.entryType || 'slide'}" style="border-top-color: ${brandPrimary}">
         <div class="headline-badge" style="background: ${brandPrimary}; border-right-color: ${brandAccent}">
           <span class="live-dot"></span>
           <span>${tk.headlineTitle || 'ASTRO NOTÍCIAS'}</span>
@@ -203,8 +300,8 @@ export function generateStandaloneHtmlBundle(
       overflow: hidden;
     }
 
-    /* Lower Third Styles */
-    .lower-third-container {
+    /* Standard News Lower Third */
+    .lower-third-container.template-standard {
       position: absolute;
       bottom: 80px;
       left: 80px;
@@ -254,8 +351,115 @@ export function generateStandaloneHtmlBundle(
       margin-top: 4px;
     }
 
+    /* Interview with Avatar Lower Third */
+    .lower-third-container.template-interview {
+      position: absolute;
+      bottom: 80px;
+      left: 80px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: linear-gradient(90deg, rgba(9,13,22,0.98), rgba(20,27,46,0.95), rgba(10,15,29,0.92));
+      padding: 16px 36px 16px 20px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.85);
+    }
+    .avatar-box { position: relative; width: 90px; height: 90px; flex-shrink: 0; }
+    .avatar-img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 4px solid; }
+    .avatar-placeholder { width: 90px; height: 90px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 38px; font-weight: 900; color: #fff; }
+    .avatar-star { position: absolute; bottom: 0; right: 0; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #fff; border: 2px solid #090d16; }
+    .content-box-interview { display: flex; flex-direction: column; }
+
+    /* Breaking News Bar Lower Third */
+    .lower-third-container.template-breaking {
+      position: absolute;
+      bottom: 80px;
+      left: 80px;
+      max-width: 1200px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 2px solid ${brandPrimary};
+      box-shadow: 0 20px 50px rgba(0,0,0,0.85), 0 0 30px ${brandPrimary}40;
+    }
+    .breaking-header {
+      padding: 8px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #fff;
+      font-weight: 900;
+      font-size: 14px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-family: 'Barlow Condensed', sans-serif;
+    }
+    .breaking-pulse-box { display: flex; align-items: center; gap: 8px; }
+    .breaking-alert-icon { font-size: 16px; }
+    .breaking-edition { font-size: 11px; opacity: 0.85; font-family: monospace; }
+    .breaking-body {
+      background: linear-gradient(90deg, rgba(10,13,22,0.98), rgba(19,25,41,0.96));
+      padding: 18px 32px;
+    }
+    .breaking-title { color: #fff; font-size: 42px; }
+
+    /* Quote Card Lower Third */
+    .lower-third-container.template-quote {
+      position: absolute;
+      bottom: 80px;
+      left: 80px;
+      background: linear-gradient(90deg, rgba(13,18,31,0.98), rgba(20,27,44,0.96));
+      padding: 24px 36px;
+      border-radius: 12px;
+      border-left: 8px solid;
+      max-width: 1000px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.85);
+    }
+    .quote-icon { font-size: 48px; line-height: 1; font-family: serif; font-weight: 900; }
+    .quote-content { display: flex; flex-direction: column; }
+    .quote-text { font-size: 30px; font-weight: 700; font-style: italic; color: #fff; line-height: 1.2; }
+    .quote-author { font-size: 20px; font-weight: 900; font-family: 'Barlow Condensed', sans-serif; text-transform: uppercase; margin-top: 8px; letter-spacing: 1px; }
+
+    /* Modern Minimal Lower Third */
+    .lower-third-container.template-minimal {
+      position: absolute;
+      bottom: 80px;
+      left: 80px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(15,23,42,0.92);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 14px 28px;
+      border-radius: 16px;
+      box-shadow: 0 20px 45px rgba(0,0,0,0.85);
+    }
+    .minimal-pill { width: 8px; height: 48px; border-radius: 4px; }
+    .minimal-content { display: flex; flex-direction: column; }
+    .minimal-title { font-size: 32px; letter-spacing: 1px; }
+    .minimal-subtitle { font-size: 17px; }
+
+    /* School Profile Lower Third */
+    .lower-third-container.template-profile {
+      position: absolute;
+      bottom: 80px;
+      left: 80px;
+      border-radius: 8px;
+      overflow: hidden;
+      border-top: 6px solid;
+      background: linear-gradient(90deg, rgba(10,13,22,0.98), rgba(19,25,41,0.96));
+      box-shadow: 0 20px 50px rgba(0,0,0,0.85);
+      min-width: 480px;
+    }
+    .profile-header { padding: 6px 24px; }
+    .profile-badge { color: #fff; font-size: 13px; font-weight: 900; text-transform: uppercase; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1.5px; }
+    .profile-body { padding: 16px 28px; }
+
     /* Scoreboard Styles */
-    .scoreboard-container {
+    .scoreboard-container.layout-compact {
       position: absolute;
       top: 50px;
       left: 70px;
@@ -266,6 +470,25 @@ export function generateStandaloneHtmlBundle(
       box-shadow: 0 20px 45px rgba(0,0,0,0.85);
       min-width: 300px;
     }
+    .scoreboard-container.layout-bottom-bar {
+      position: absolute;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .sb-bottom-box {
+      display: flex;
+      align-items: center;
+      background: rgba(7, 11, 20, 0.98);
+      border-radius: 14px;
+      border: 2px solid rgba(255,255,255,0.2);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.85);
+      overflow: hidden;
+    }
+    .sb-time-col { background: #030508; padding: 14px 24px; text-align: center; border-right: 1px solid rgba(255,255,255,0.15); }
+    .sb-time { font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 900; }
+    .sb-team-side { display: flex; align-items: center; gap: 14px; padding: 14px 24px; }
+    .sb-divider { font-size: 18px; color: #64748b; }
     .sb-header {
       background: #030509;
       padding: 6px 14px;
@@ -310,7 +533,7 @@ export function generateStandaloneHtmlBundle(
       width: 100%;
       height: 64px;
       background: rgba(7, 10, 18, 0.98);
-      border-top: 2px solid ${brandPrimary};
+      border-top: 2px solid;
       display: flex;
       align-items: center;
       overflow: hidden;
@@ -462,7 +685,7 @@ export function generateStandaloneHtmlBundle(
 </html>`;
 }
 
-// Export 1920x1080 Transparent PNG from dedicated offscreen bundle (Guaranteed Non-Empty)
+// Export 1920x1080 Transparent PNG from dedicated offscreen bundle (Guaranteed Exact Selected Template Style)
 export async function exportOverlayItemToPng(
   category: 'lowerThird' | 'scoreboard' | 'ticker' | 'bug' | 'countdown' | 'fullscreen',
   data: any,
@@ -490,7 +713,6 @@ export async function exportOverlayItemToPng(
     iframeDoc.write(htmlDoc);
     iframeDoc.close();
 
-    // Wait for fonts & layout to be 100% ready
     if (iframeDoc.fonts) {
       await iframeDoc.fonts.ready;
     }
@@ -521,7 +743,7 @@ export async function exportOverlayItemToPng(
   }
 }
 
-// High-Speed Animated WebM Video Exporter from dedicated offscreen bundle
+// High-Speed Animated WebM Video Exporter from dedicated offscreen bundle (Guaranteed Exact Selected Template Style)
 export async function exportOverlayItemToWebM(
   category: 'lowerThird' | 'scoreboard' | 'ticker' | 'bug' | 'countdown' | 'fullscreen',
   data: any,

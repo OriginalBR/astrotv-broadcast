@@ -493,13 +493,25 @@ export const LowerThirdsManager: React.FC = () => {
               </span>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  setExportTarget(selectedItem);
+                  setIsExportModalOpen(true);
+                }}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all shadow"
+                title="Exportar este estilo selecionado"
+              >
+                <Download className="w-4 h-4" />
+                Baixar Este Estilo
+              </button>
+
               <button
                 onClick={() => setQueuedOverlay('lowerThird', selectedItem)}
-                className="flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all"
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-800 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all"
               >
                 <Eye className="w-4 h-4" />
-                Colocar na Fila (Preview)
+                Preview
               </button>
 
               {activeLowerThird?.id === selectedItem.id ? (
