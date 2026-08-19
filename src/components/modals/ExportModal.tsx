@@ -12,8 +12,8 @@ import {
   Sparkles
 } from 'lucide-react';
 import { 
-  exportOverlayToPng, 
-  exportOverlayToWebM, 
+  exportOverlayItemToPng, 
+  exportOverlayItemToWebM, 
   downloadStandaloneHtmlFile, 
   downloadJson 
 } from '../../utils/exporter';
@@ -42,7 +42,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   if (!isOpen) return null;
 
   const itemToExport = selectedItem || {
-    title: 'Overlay Geral',
+    title: 'AstroTv Broadcast',
+    subtitle: 'Imprensa Astro • TV Profissional',
     name: 'AstroTv Overlay',
   };
 
@@ -53,13 +54,14 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     setErrorMessage('');
 
     try {
-      const filename = `astrotv_${category}_${(itemToExport.name || itemToExport.title || 'overlay').toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
-      const elementId = `export-${category === 'lowerThird' ? 'lower-third' : category}`;
+      const rawName = itemToExport.name || itemToExport.title || itemToExport.headlineTitle || 'overlay';
+      const cleanName = rawName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '_');
+      const filename = `astrotv_${category}_${cleanName}`;
 
       if (format === 'png') {
-        await exportOverlayToPng(elementId, filename);
+        await exportOverlayItemToPng(category, itemToExport, brandTheme, filename);
       } else if (format === 'webm') {
-        await exportOverlayToWebM(elementId, filename, 3, (pct) => {
+        await exportOverlayItemToWebM(category, itemToExport, brandTheme, filename, 3, (pct) => {
           setExportProgress(pct);
         });
       } else if (format === 'html') {
@@ -83,7 +85,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 select-none">
       <div className="bg-[#111624] border border-white/10 rounded-2xl max-w-xl w-full p-6 shadow-2xl relative text-white max-h-[90vh] overflow-y-auto">
         {/* Close Button */}
         <button 
@@ -100,10 +102,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           </div>
           <div>
             <h2 className="text-xl font-bold font-condensed uppercase tracking-wider">
-              Baixar Overlay de Transmissão
+              Exportar Overlay de Transmissão
             </h2>
             <p className="text-xs text-slate-400">
-              {itemToExport.name || itemToExport.title || 'Overlay Personalizado'} ({category.toUpperCase()})
+              {itemToExport.name || itemToExport.title || itemToExport.headlineTitle || 'Overlay Selecionado'} ({category.toUpperCase()})
             </p>
           </div>
         </div>
@@ -146,9 +148,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 Vídeo Animado
               </span>
             </div>
-            <div className="font-bold text-sm">Vídeo Animado (WebM Alpha)</div>
+            <div className="font-bold text-sm">Vídeo Animado (Alpha 60fps)</div>
             <p className="text-[11px] text-slate-400 mt-1 leading-snug">
-              Vídeo renderizado com a animação de entrada e fundo transparente.
+              Vídeo em alta resolução gravando a animação de entrada com canal alfa transparente.
             </p>
           </button>
 
@@ -190,7 +192,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             </div>
             <div className="font-bold text-sm">Pacote ZIP com Manual</div>
             <p className="text-[11px] text-slate-400 mt-1 leading-snug">
-              Pacote compactado com o HTML e instruções de configuração para o OBS.
+              Pacote compactado com o HTML e instruções passo a passo de configuração para o OBS.
             </p>
           </button>
         </div>
@@ -214,7 +216,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         {isExporting && format === 'webm' && (
           <div className="mb-4 bg-[#0a0d14] p-3 rounded-xl border border-white/10">
             <div className="flex items-center justify-between text-xs text-purple-300 font-bold mb-1.5">
-              <span>Gravando vídeo animado...</span>
+              <span>Renderizando vídeo Full HD com transparência...</span>
               <span>{exportProgress}%</span>
             </div>
             <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
@@ -247,7 +249,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             ) : (
               <>
                 <Download className="w-4 h-4" />
-                <span>Baixar Agora</span>
+                <span>Baixar Arquivo</span>
               </>
             )}
           </button>
