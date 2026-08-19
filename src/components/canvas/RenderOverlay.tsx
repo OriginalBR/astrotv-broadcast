@@ -461,12 +461,13 @@ const TickerRenderer: React.FC<{ data: TickerData; theme: OverlayTheme; stationN
   return (
     <div 
       id="export-ticker"
-      className={`absolute bottom-0 left-0 w-full h-[62px] bg-[#070a12]/98 border-t-2 border-red-500 shadow-2xl flex items-center z-40 select-none backdrop-blur-2xl broadcast-shimmer ${animClass}`}
+      className={`absolute bottom-0 left-0 right-0 w-full h-[64px] bg-[#070a12]/98 border-t-2 shadow-2xl flex items-center z-40 select-none backdrop-blur-2xl broadcast-shimmer ${animClass}`}
+      style={{ borderTopColor: primaryColor }}
     >
-      {/* Brand / Headline Badge (Fixed on Left with Auto-Fit Width & Crisp Separator) */}
+      {/* Brand / Headline Badge (Fixed on Left with Auto-Fit Width & Dynamic Theme Border) */}
       <div 
-        className="h-full px-6 flex items-center gap-2.5 font-black text-lg text-white tracking-wider uppercase flex-shrink-0 z-30 shadow-2xl font-condensed border-r-4 border-yellow-400"
-        style={{ backgroundColor: primaryColor }}
+        className="h-full px-6 flex items-center gap-2.5 font-black text-lg text-white tracking-wider uppercase flex-shrink-0 z-30 shadow-2xl font-condensed border-r-4"
+        style={{ backgroundColor: primaryColor, borderRightColor: accentColor }}
       >
         <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
         <span className="whitespace-nowrap drop-shadow">{headlineTitle}</span>
