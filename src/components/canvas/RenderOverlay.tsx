@@ -444,6 +444,7 @@ const TickerRenderer: React.FC<{ data: TickerData; theme: OverlayTheme; stationN
   stationName 
 }) => {
   const primaryColor = theme?.primaryColor || '#e63946';
+  const accentColor = theme?.accentColor || '#ffd166';
   const [staticIndex, setStaticIndex] = useState(0);
 
   useEffect(() => {
